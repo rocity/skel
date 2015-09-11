@@ -40,6 +40,3 @@ class Database extends Config
         return false;
     }
 }
-
-$db = new Database();
-var_dump($db->selectUsers());

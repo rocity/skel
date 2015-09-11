@@ -39,4 +39,41 @@ class Database extends Config
         }
         return false;
     }
+
+    // $data should be an array
+    // $column: the specific column that the user wants to get. (optional)
+    // $order: $order['col'] = the column to be ordered
+    // $order: $order['mode'] = DESC/ASC
+    // TODO: Implement value comparison in queries (>, <, >=, <=)
+    // SAMPLE USE
+    // $db = new Database();
+    // $db->select("users",array("id" => 9, "username" => "kurdapyo",),2,"password");
+    public function select($table, $data = array(), $limit = 1, $column = null, $order = array('col' => 'id', 'mode' => 'DESC')) {
+
+        $select = isset($column) ? '`' . $column . '`' : '*';
+        $limit = $limit > 1 ? $limit : 1;
+        $conditions = array();
+
+        foreach ($data as $dataKey => $dataVal) {
+            if (gettype($dataVal) === 'integer') {
+                array_push($conditions, ' `'.$dataKey.'`='.$dataVal. ' ');
+            } else {
+                array_push($conditions, ' `'.$dataKey.'`="'.$dataVal.'" ');
+            }
+        }
+
+        $condition = '';
+        for ($i=0; $i < count($conditions); $i++) { 
+            if ($i === 0) {
+                $condition .= $conditions[0];
+            } else {
+                $condition .= ' AND ' . $conditions[$i] . ' ';
+            }
+        }
+
+        $query = 'SELECT ' . $select . ' FROM `' . $table . '` WHERE ' 
+                    . $condition . ' ORDER BY `'. $order['col'] .'` '. $order['mode'] . ' LIMIT ' . $limit .';';
+
+        return $query;
+    }
 }

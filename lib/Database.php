@@ -105,4 +105,44 @@ class Database extends Config
         }
         return false;
     }
+
+    /*
+    * Update data present in the database
+    * Example:
+    * $db = new Database();
+    * $db->update("users", array('username' => 'kurdapyo'), array('id' => 2));
+    */
+    public function update($table, $data = array(), $conditions = array()) {
+        $conn = $this->conn;
+
+        if (!$table || $table == '') {
+            return false;
+        }
+
+        $set = '';
+        foreach ($data as $dataKey => $dataVal) {
+            if (gettype($dataVal) === 'integer') {
+                $set .= '`' . $dataKey . '`=' . $dataVal . ', ';
+            } else {
+                $set .= '`' . $dataKey . '`="' . $dataVal . '", ';
+            }
+        }
+
+        $where = '';
+        foreach ($conditions as $condKey => $condVal) {
+            if (gettype($condVal) === 'integer') {
+                $where .= '`' . $condKey . '`=' . $condVal . ', ';
+            } else {
+                $where .= '`' . $condKey . '`="' . $condVal . '", ';
+            }
+        }
+
+        $set = rtrim($set, ', ');
+        $where = rtrim($where, ', ');
+
+        $query = 'UPDATE `' . $table . '` SET ' . $set . ' WHERE ' . $where . ';';
+
+        // returns boolean
+        return $conn->query($query);
+    }
 }

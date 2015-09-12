@@ -145,4 +145,8 @@ class Database extends Config
         // returns boolean
         return $conn->query($query);
     }
+
+    public function delete($table, $id) {
+        // delete
+    }
 }

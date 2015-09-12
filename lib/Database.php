@@ -25,21 +25,6 @@ class Database extends Config
         }
     }
 
-    public function selectUsers() {
-        $con = $this->conn;
-        $q = 'SELECT * FROM `users` LIMIT 10';
-        $result = $con->query($q);
-        if ($result->num_rows > 0) {
-            $ret = array();
-            while ($row = $result->fetch_assoc()) {
-                array_push($ret, $row);
-            }
-            $ret['query_count'] = $result->num_rows;
-            return $ret;
-        }
-        return false;
-    }
-
     // $data should be an array
     // $column: the specific column that the user wants to get. (optional)
     // $order: $order['col'] = the column to be ordered
@@ -49,7 +34,7 @@ class Database extends Config
     // $db = new Database();
     // $db->select("users",array("id" => 9, "username" => "kurdapyo",),2,"password");
     public function select($table, $data = array(), $limit = 1, $column = null, $order = array('col' => 'id', 'mode' => 'DESC')) {
-
+        $conn = $this->conn;
         $select = isset($column) ? '`' . $column . '`' : '*';
         $limit = $limit > 1 ? $limit : 1;
         $conditions = array();
@@ -74,6 +59,50 @@ class Database extends Config
         $query = 'SELECT ' . $select . ' FROM `' . $table . '` WHERE ' 
                     . $condition . ' ORDER BY `'. $order['col'] .'` '. $order['mode'] . ' LIMIT ' . $limit .';';
 
-        return $query;
+        $result = $conn->query($query);
+        if ($result->num_rows > 0) {
+            $ret = array();
+            while ($row = $result->fetch_assoc()) {
+                array_push($ret, $row);
+            }
+            return $ret;
+        }
+        return false;
+    }
+
+    /*
+    * Insert data into the database
+    * Example usage:
+    * $db = new Database();
+    * $date = date('Y-m-d h:i:s');
+    * $db->insert("users", array('username' => 'user2', 'password' => 'qwery', 'type' => 1, 'status' => 0, 'modified' => $date, 'created' => $date));
+    */
+    public function insert($table, $data = array()) {
+        $conn = $this->conn;
+        if (!$table || $table == '') {
+            return false;
+        }
+
+        $fields = '';
+        $values = '';
+        foreach ($data as $dataKey => $dataVal) {
+            $fields .= '`'. $dataKey .'`, ';
+
+            if (gettype($dataVal) === 'integer') {
+                $values .= $dataVal . ', ';
+            } else {
+                $values .= '"'. $dataVal . '", ';
+            }
+        }
+
+        $fields = rtrim($fields, ', ');
+        $values = rtrim($values, ', ');
+
+        $query = 'INSERT INTO `'. $table . '` (' . $fields . ') VALUES (' . $values . ');';
+
+        if ($result = $conn->query($query)) {
+            return $conn->insert_id;
+        }
+        return false;
     }
 }

@@ -146,7 +146,14 @@ class Database extends Config
         return $conn->query($query);
     }
 
+    // Change data `status` to 0 to indicate that it is deleted
+    // Example:
+    // $db = new Database();
+    // $db->delete("users", 1);
     public function delete($table, $id) {
-        // delete
+        $conn = $this->conn;
+        // ALWAYS in projects: status 0 is the "deleted" mark
+        $query = 'UPDATE `' . $table . '` SET `status`=0 WHERE `id`=' . $id . ';';
+        return $conn->query($query);
     }
 }
